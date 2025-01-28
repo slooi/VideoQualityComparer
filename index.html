@@ -14,90 +14,47 @@
 		}
 
 		body {
-			overflow-x: hidden;
+			overflow: hidden;
+		}
+
+
+
+		#container {
+			position: relative;
 		}
 
 		.video-overlay {
 			position: absolute;
-			top: 10px;
-			left: 10px;
-			/* opacity: 50%; */
+			top: 0px;
+			left: 0px;
 		}
 
 		#video1 {
-
 			clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
 		}
 
-		img {
-			/* clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); */
-
+		#comparison-slider {
+			position: absolute;
+			left: 0;
+			bottom: 0;
 		}
 	</style>
 </head>
 
 <body>
-	<div class="container">
-		<div class="video-container">
-			<video id="video2" autoplay loop muted>
-				<source src="media/dlow.mp4" type="video/mp4">
+	<div id="container">
+		<video id="video2" autoplay loop muted>
+			<source src="media/dlow.mp4" type="video/mp4">
+		</video>
+		<div class="video-overlay">
+			<video id="video1" loop muted>
+				<source src="media/fhigh.mp4" type="video/mp4">
 			</video>
-			<div class="video-overlay">
-				<video id="video1" loop muted>
-					<source src="media/fhigh.mp4" type="video/mp4">
-				</video>
-			</div>
-			<!-- <img src="t.png" alt=""> -->
-			<div class="slider-line"></div>
 		</div>
-		<div class="slider">
-			<input type="range" min="0" max="100" value="50" id="comparison-slider">
-		</div>
+		<input type="range" min="0" max="10000" value="5000" id="comparison-slider" style="width:100vw">
 	</div>
-	<!-- <canvas width="1920" height="1080"></canvas> -->
 
 	<script>
-		async function initVideoComparer() {
-			const canvas = document.querySelector("canvas");
-			const ctx = canvas.getContext("2d");
-			const videos = document.querySelectorAll("video");
-			const slider = document.getElementById("comparison-slider");
-
-			// Function to load a single video
-			const loadVideo = async (video, i) => {
-				return new Promise((resolve, reject) => {
-					video.addEventListener('loadeddata', () => {
-						console.log(`Video ${i} ready`)
-						resolve()
-					}, { once: true });
-					video.addEventListener('error', (e) => reject(e), { once: true });
-				});
-			};
-
-			try {
-				// Wait for all videos to load
-				console.log("waiting...")
-				await Promise.all([...videos].map((video, i) => loadVideo(video, i)));
-				console.log("All videos loaded successfully");
-
-				// Start the animation loop
-				startAnimation(videos, ctx, canvas, slider);
-			} catch (error) {
-				console.error("Error loading videos:", error);
-			}
-		}
-
-		function startAnimation(videos, ctx, canvas, slider) {
-			// function step() { // update the canvas when a video proceeds to next frame
-			// 	ctx.drawImage(videos[0], 0, 0, canvas.width / 2, canvas.height, 0, 0, canvas.width / 2, canvas.height);
-			// 	requestAnimationFrame(step)
-			// }
-
-			// requestAnimationFrame(step)
-
-		}
-
-		initVideoComparer()
 
 	</script>
 </body>
