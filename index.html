@@ -30,7 +30,7 @@
 		}
 
 		#video1 {
-			clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+			clip-path: polygon(50% 0%, 100% 0%, 100% 100%, 50% 100%);
 		}
 
 		#comparison-slider {
@@ -47,7 +47,7 @@
 			<source src="media/dlow.mp4" type="video/mp4">
 		</video>
 		<div class="video-overlay">
-			<video id="video1" loop muted>
+			<video id="video1" autoplay loop muted>
 				<source src="media/fhigh.mp4" type="video/mp4">
 			</video>
 		</div>
@@ -55,7 +55,30 @@
 	</div>
 
 	<script>
+		let isPaused = false
+		window.addEventListener("keydown", e => {
+			console.log(e.key)
+			switch (e.key) {
+				case " ":
+					isPaused = !isPaused
+					toggleVideos()
+					break;
 
+				case "0":
+					resetVideos()
+					break;
+			}
+		})
+		function toggleVideos() {
+			[...document.querySelectorAll("video")].forEach(vid => {
+				isPaused ? vid.pause() : vid.play()
+			})
+		}
+		function resetVideos() {
+			[...document.querySelectorAll("video")].forEach(vid => {
+				vid.currentTime = 0
+			})
+		}
 	</script>
 </body>
 
