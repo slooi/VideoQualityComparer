@@ -11,10 +11,11 @@
 		body {
 			padding: 0;
 			margin: 0;
+			box-sizing: border-box;
 		}
 
 		body {
-			overflow: hidden;
+			/* overflow: hidden; */
 		}
 
 
@@ -23,63 +24,181 @@
 			position: absolute;
 		}
 
-		.video-overlay {
-			position: absolute;
-			top: 0px;
-			left: 0px;
-		}
-
-		#video1 {
-			clip-path: polygon(50% 0%, 100% 0%, 100% 100%, 50% 100%);
-		}
 
 		#comparison-slider {
 			position: absolute;
 			left: 0;
-			bottom: 0;
+			bottom: 50%;
 			width: 100%;
+		}
+
+		#video-overlay {
+			position: absolute;
+			top: 0.15px;
+			left: 0.09px;
 		}
 	</style>
 </head>
 
 <body>
 	<div id="container">
-		<video id="video2" autoplay loop muted>
-			<source src="media/dlow.mp4" type="video/mp4">
+		<video id="video-original" autoplay loop muted>
+			<source src="media/cq1_10_4k_lanczos.mp4" type="video/mp4">
 		</video>
-		<div class="video-overlay">
-			<video id="video1" autoplay loop muted>
-				<source src="media/fhigh.mp4" type="video/mp4">
-			</video>
-		</div>
+		<video id="video-overlay" autoplay loop muted>
+			<source src="media/cq1_10_4k_laz_av1_nvenc_cq1.mp4" type="video/mp4">
+		</video>
 		<input type="range" min="0" max="10000" value="5000" id="comparison-slider">
 	</div>
 
 	<script>
+		const timeStep = 1 / 1000 * 60 / 4
 		let isPaused = false
+		const video0 = [...document.querySelectorAll("video")][0]
+		const video1 = [...document.querySelectorAll("video")][1]
+		let timeOffset = 0 - timeStep / 4 * 37
 		window.addEventListener("keydown", e => {
 			console.log(e.key)
 			switch (e.key) {
 				case " ":
 					isPaused = !isPaused
 					toggleVideos()
+
+					syncVideosWithOffset();
 					break;
 
 				case "0":
 					resetVideos()
 					break;
+				case "]":
+					timeOffset += timeStep / 4;
+					console.log("timeOffset", timeOffset);
+					syncVideosWithOffset();
+					break;
+				case "[":
+					timeOffset -= timeStep / 4;
+					console.log("timeOffset", timeOffset);
+					syncVideosWithOffset();
+					break;
+				case ">":
+					console.log("a", video1.currentTime);
+					video0.currentTime += timeStep;
+					video1.currentTime += timeStep;
+					console.log("b", video1.currentTime);
+					break;
+				case "<":
+					console.log("a", video1.currentTime);
+					video0.currentTime -= timeStep;
+					video1.currentTime -= timeStep;
+					console.log("b", video1.currentTime);
+					break;
+				case "a":
+					console.log("vid0", video0.currentTime);
+					console.log("vid1", video1.currentTime);
+					break;
+				case "s":
+					syncVideosWithOffset();
+					break;
+				case ":":
+					if (video1.playbackRate > 0.1) {
+						video1.playbackRate -= 0.1;
+						video0.playbackRate -= 0.1;
+						syncVideosWithOffset();
+						console.log("video1.playbackRate", video1.playbackRate)
+					}
+					break;
+				case '"':
+					if (video1.playbackRate < 2) {
+						video1.playbackRate += 0.1;
+						video0.playbackRate += 0.1;
+						syncVideosWithOffset();
+						console.log("video1.playbackRate", video1.playbackRate)
+					}
+					break;
+				case "1":
+					video0.currentTime -= 10;
+					video1.currentTime -= 10;
+					break;
+				case '2':
+					video0.currentTime += 10;
+					video1.currentTime += 10;
+					break;
 			}
 		})
 		function toggleVideos() {
-			[...document.querySelectorAll("video")].forEach(vid => {
+			[...document.querySelectorAll("video")].forEach((vid, i) => {
+				console.log("vid" + i + " " + vid.currentTime)
 				isPaused ? vid.pause() : vid.play()
 			})
 		}
 		function resetVideos() {
 			[...document.querySelectorAll("video")].forEach(vid => {
-				vid.currentTime = 0
+				vid.currentTime = 0;
 			})
 		}
+
+
+
+		document.getElementById("comparison-slider").addEventListener("change", e => {
+			const clipProportion = Number(e.target.value) / Number(e.target.max)
+			const videoOverlay = document.getElementById("video-overlay")
+			// console.log(clipProportion, videoOverlay)
+			setClipOfVideo(videoOverlay, clipProportion)
+		})
+
+
+		document.getElementById("comparison-slider").addEventListener("input", e => {
+			const clipProportion = Number(e.target.value) / Number(e.target.max)
+			const videoOverlay = document.getElementById("video-overlay")
+			// console.log(clipProportion, videoOverlay)
+			setClipOfVideo(videoOverlay, clipProportion)
+		})
+
+		/**
+		 * Represents a book.
+		 * @param {HTMLVideoElement} video - video element to clip
+		 * @param {number} proportion - A float from 0 to 1
+		 */
+		function setClipOfVideo(video, proportion) {
+
+			video.style.clipPath = `polygon(${proportion * 100}% 0%, 100% 0%, 100% 100%, ${proportion * 100}% 100%)`;
+			// console.log("video.style.clipPath", video.style.clipPath)
+		}
+		setClipOfVideo(video1, 0.5)
+
+
+		// document.getElementById("video-original").on
+		// const a = 1 / 1000 * 60 / 2
+		// function loop() {
+		// 	console.log("wee")
+		// 	if (document.getElementById("video-overlay").currentTime < document.getElementById("video-original").currentTime + a) {
+		// 		document.getElementById("video-overlay").currentTime += a * 5
+		// 	}
+
+		// 	console.log(document.getElementById("video-overlay").currentTime)
+		// 	console.log(document.getElementById("video-original").currentTime)
+		// 	requestAnimationFrame(loop)
+		// }
+		// requestAnimationFrame(loop)
+
+		document.getElementById("video-original").addEventListener("timeupdate", () => {
+			console.log("update time is happening")
+			const timeDiff = Math.abs(document.getElementById("video-original").currentTime - document.getElementById("video-overlay").currentTime)
+			const maxTimeDiff = timeStep + Math.abs(timeOffset)
+			if (timeDiff > maxTimeDiff) {
+				console.log(timeDiff, maxTimeDiff);
+				// document.getElementById("video-overlay").currentTime = document.getElementById("video-original").currentTime + timeStep * 3;
+				syncVideosWithOffset();
+			}
+		});
+
+		function syncVideosWithOffset() {
+			video1.currentTime = video0.currentTime + timeOffset;
+			video0.currentTime = video1.currentTime - timeOffset;
+		}
+
+		// document.getElementById("video-original").addEventListener("play", () => document.getElementById("video-overlay").play());
+		// document.getElementById("video-original").addEventListener("pause", () => document.getElementById("video-overlay").pause());
 	</script>
 </body>
 
